@@ -20,6 +20,13 @@ const getProfiles = (): ProfileData[] => {
   }
 };
 
+interface SessionRequest {
+  id: string;
+  skill: string;
+  requesterName: string;
+  requesterSkills: string;
+}
+
 export default function BrowsePage() {
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
 
@@ -27,6 +34,37 @@ export default function BrowsePage() {
     const storedProfiles = getProfiles();
     setProfiles(storedProfiles);
   }, []);
+
+  const handleRequestSession = (profile: ProfileData) => {
+    const requestId = Math.random().toString(36).substring(2, 15);
+    const sessionRequest: SessionRequest = {
+      id: requestId,
+      skill: profile.skills,
+      requesterName: 'Your Name', // Replace with actual user name
+      requesterSkills: 'Your Skills', // Replace with actual user skills
+    };
+
+    try {
+      // Get existing session requests from local storage
+      let sessionRequests: SessionRequest[] = [];
+      const storedRequests = localStorage.getItem('sessionRequests');
+      if (storedRequests) {
+        sessionRequests = JSON.parse(storedRequests);
+      }
+
+      // Add the new session request to the list
+      sessionRequests.push(sessionRequest);
+
+      // Save the updated list back to local storage
+      localStorage.setItem('sessionRequests', JSON.stringify(sessionRequests));
+
+      alert('Session requested successfully!');
+    } catch (error) {
+      console.error('Error saving session request to local storage:', error);
+      alert('Failed to request session.');
+    }
+  };
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -48,7 +86,7 @@ export default function BrowsePage() {
               <CardContent>
                 Wants to learn: {profile.interests}
               </CardContent>
-              <Button className="m-4">Request Session</Button>
+              <Button className="m-4" onClick={() => handleRequestSession(profile)}>Request Session</Button>
             </Card>
           ))}
         </div>
