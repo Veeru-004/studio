@@ -202,24 +202,28 @@ export default function BrowsePage() {
         )}
 
         <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredProfiles.map((profile, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle>{profile.name}</CardTitle>
-                <CardDescription>Skills: {profile.skills}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                Wants to learn: {profile.interests}
-              </CardContent>
-              <Button
-                className="m-4"
-                onClick={() => handleRequestSession(profile)}
-                disabled={!loggedInUser}
-              >
-                Request Session
-              </Button>
-            </Card>
-          ))}
+          {filteredProfiles.length > 0 ? (
+            filteredProfiles.map((profile, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle>{profile.name}</CardTitle>
+                  <CardDescription>Skills: {profile.skills}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  Wants to learn: {profile.interests}
+                </CardContent>
+                <Button
+                  className="m-4"
+                  onClick={() => handleRequestSession(profile)}
+                  disabled={!loggedInUser}
+                >
+                  Request Session
+                </Button>
+              </Card>
+            ))
+          ) : (
+            <p>No other profiles available.</p>
+          )}
         </div>
       </main>
 

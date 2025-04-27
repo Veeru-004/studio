@@ -1,5 +1,6 @@
-import type {Metadata} from 'next';
-import {Geist, Geist_Mono} from 'next/font/google';
+'use client';
+
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import ClientLayout from "@/app/ClientLayout";
 
@@ -13,21 +14,17 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
-  title: 'SkillSwap - EduPair',
-  description: 'A peer-to-peer learning network where students teach what they know, learn what they do not, and earn credits to unlock more knowledge.',
-};
 
 export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
+  children,
+}: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
-    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-    <ClientLayout>{children}</ClientLayout>
-    </body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ClientLayout>{children}</ClientLayout>
+      </body>
     </html>
   );
 }

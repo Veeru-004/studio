@@ -50,7 +50,7 @@ export default function ProfilePage() {
         profiles = JSON.parse(storedProfiles);
       }
 
-      // Update the current profile data with the logged-in user's ID
+      // Update the current profile data with the logged-in user's ID and name
       const updatedProfileData = { ...profileData, id: loggedInUser.id, name: loggedInUser.name };
 
       // Find the index of the logged-in user's profile
@@ -66,10 +66,13 @@ export default function ProfilePage() {
 
       // Save the updated list back to local storage
       localStorage.setItem('profiles', JSON.stringify(profiles));
-      localStorage.setItem('loggedInUser', JSON.stringify(updatedProfileData));
 
       // Update local state to reflect the changes
       setProfileData(updatedProfileData);
+
+      // Also update the loggedInUser in localStorage
+      localStorage.setItem('loggedInUser', JSON.stringify(updatedProfileData));
+      setLoggedInUser(updatedProfileData);
 
       toast({
         title: "Profile Updated",

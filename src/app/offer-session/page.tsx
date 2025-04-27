@@ -5,6 +5,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useRouter} from "next/navigation";
 import {useToast} from "@/hooks/use-toast";
+import {Button} from "@/components/ui/button";
 
 interface SessionRequest {
   id: string;
@@ -34,6 +35,7 @@ const getSessionRequests = (): SessionRequest[] => {
 
 export default function OfferSessionPage() {
   const [receivedSessionRequests, setReceivedSessionRequests] = useState<SessionRequest[]>([]);
+  const [mySessionRequests, setMySessionRequests] = useState<SessionRequest[]>([]);
   const [activeTab, setActiveTab] = useState<string>("receivedRequests");
   const [loggedInUser, setLoggedInUser] = useState<ProfileData | null>(null);
   const router = useRouter();
@@ -56,6 +58,10 @@ export default function OfferSessionPage() {
       // Filter session requests to show only those where the logged-in user is the teacher
       const receivedRequests = allRequests.filter(request => request.teacherName === loggedInUser.name);
       setReceivedSessionRequests(receivedRequests);
+
+      // Filter session requests to show only those where the logged-in user is the student
+      const myRequests = allRequests.filter(request => request.studentName === loggedInUser.name);
+      setMySessionRequests(myRequests);
     }
   }, [loggedInUser]);
 
@@ -96,6 +102,7 @@ export default function OfferSessionPage() {
         <Tabs className="mt-12 w-full" value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="receivedRequests">Received Requests</TabsTrigger>
+            <TabsTrigger value="myRequests">My Requests</TabsTrigger>
           </TabsList>
 
           <TabsContent value="receivedRequests">
@@ -121,6 +128,29 @@ export default function OfferSessionPage() {
                 ))
               ) : (
                 <p>No session requests received.</p>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="myRequests">
+            <p className="mt-3 text-2xl text-muted-foreground">
+              Here are the session requests you have made to others.
+            </p>
+            <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {mySessionRequests.length > 0 ? (
+                mySessionRequests.map((request) => (
+                  <Card key={request.id}>
+                    <CardHeader>
+                      <CardTitle>Request for: {request.skill}</CardTitle>
+                      <CardDescription>Teacher: {request.teacherName}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      Teacher Skills: {request.teacherSkills}
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <p>No sessions requested yet.</p>
               )}
             </div>
           </TabsContent>

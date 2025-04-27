@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
 
 export default function ClientLayout({children}: { children: React.ReactNode }) {
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
@@ -17,6 +19,7 @@ export default function ClientLayout({children}: { children: React.ReactNode }) 
   const handleLogout = () => {
     localStorage.removeItem('loggedInUser');
     setLoggedInUser(null);
+    router.push('/browse');
   };
 
   return (

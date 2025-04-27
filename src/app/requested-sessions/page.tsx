@@ -41,14 +41,16 @@ export default function RequestedSessionsPage() {
   }, []);
 
   useEffect(() => {
-    const allRequests = getSessionRequests();
-
     if (loggedInUser) {
+      // Retrieve all session requests
+      const allRequests = getSessionRequests();
+
       // Filter session requests to only show those made by the logged-in user
       const myRequests = allRequests.filter(request => request.studentName === loggedInUser.name);
       setMySessionRequests(myRequests);
     }
   }, [loggedInUser]);
+
 
   if (!loggedInUser) {
     return <div className="flex flex-col items-center justify-center min-h-screen">Please log in to view your requested sessions.</div>;
