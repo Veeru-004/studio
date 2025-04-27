@@ -50,6 +50,10 @@ export default function RequestedSessionsPage() {
     }
   }, [loggedInUser]);
 
+  if (!loggedInUser) {
+    return <div className="flex flex-col items-center justify-center min-h-screen">Please log in to view your requested sessions.</div>;
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <main className="flex flex-col items-center justify-center w-full flex-1 px-4 text-center">
@@ -60,17 +64,21 @@ export default function RequestedSessionsPage() {
           Here are the sessions you have requested from others.
         </p>
         <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {mySessionRequests.map((request) => (
-            <Card key={request.id}>
-              <CardHeader>
-                <CardTitle>Request for: {request.skill}</CardTitle>
-                <CardDescription>Teacher: {request.teacherName}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                Teacher Skills: {request.teacherSkills}
-              </CardContent>
-            </Card>
-          ))}
+          {mySessionRequests.length > 0 ? (
+            mySessionRequests.map((request) => (
+              <Card key={request.id}>
+                <CardHeader>
+                  <CardTitle>Request for: {request.skill}</CardTitle>
+                  <CardDescription>Teacher: {request.teacherName}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  Teacher Skills: {request.teacherSkills}
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p>No sessions requested yet.</p>
+          )}
         </div>
       </main>
 
