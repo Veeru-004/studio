@@ -24,16 +24,23 @@ const getSessionRequests = (): SessionRequest[] => {
 export default function OfferSessionPage() {
   const [mySessionRequests, setMySessionRequests] = useState<SessionRequest[]>([]);
   const [receivedSessionRequests, setReceivedSessionRequests] = useState<SessionRequest[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("myRequests");
 
   useEffect(() => {
     const allRequests = getSessionRequests();
 
-    // Filter session requests to only show those where the requester name matches "Your Name"
-    const myRequests = allRequests.filter(request => request.requesterName === "Your Name");
+    // Filter session requests to only show those where the requester name matches the current profile name
+    const myProfile = localStorage.getItem('myProfile');
+    let myName = "Your Name";
+    if (myProfile) {
+      const profileData = JSON.parse(myProfile);
+      myName = profileData.name || "Your Name";
+    }
+    const myRequests = allRequests.filter(request => request.requesterName === myName);
     setMySessionRequests(myRequests);
 
-    // Filter session requests to only show those which are not made by "Your Name"
-    const receivedRequests = allRequests.filter(request => request.requesterName !== "Your Name");
+    // Filter session requests to only show those which are not made by the current profile name
+    const receivedRequests = allRequests.filter(request => request.requesterName !== myName);
     setReceivedSessionRequests(receivedRequests);
   }, []);
 
@@ -47,7 +54,7 @@ export default function OfferSessionPage() {
           Manage your session requests.
         </p>
 
-        <Tabs className="mt-12 w-full">
+        <Tabs className="mt-12 w-full" value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="myRequests">My Requests</TabsTrigger>
             <TabsTrigger value="receivedRequests">Received Requests</TabsTrigger>
