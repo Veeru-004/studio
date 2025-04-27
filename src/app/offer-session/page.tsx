@@ -24,7 +24,8 @@ export default function OfferSessionPage() {
   const [sessionRequests, setSessionRequests] = useState<SessionRequest[]>([]);
 
   useEffect(() => {
-    const requests = getSessionRequests();
+    // Filter session requests to only show those where the requester name matches "Your Name"
+    const requests = getSessionRequests().filter(request => request.requesterName === "Your Name");
     setSessionRequests(requests);
   }, []);
 
@@ -35,7 +36,7 @@ export default function OfferSessionPage() {
           Session <span className="text-secondary">Requests</span>
         </h1>
         <p className="mt-3 text-2xl text-muted-foreground">
-          Here are the sessions requested from you.
+          Here are the sessions you have requested.
         </p>
 
         <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
