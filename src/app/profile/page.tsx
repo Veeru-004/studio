@@ -4,6 +4,7 @@ import {useState, useEffect} from 'react';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Button} from '@/components/ui/button';
+import {useToast} from "@/hooks/use-toast";
 
 interface ProfileData {
   name: string;
@@ -23,6 +24,7 @@ const getInitialProfileData = (): ProfileData => {
 
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState<ProfileData>(getInitialProfileData);
+  const {toast} = useToast();
 
   useEffect(() => {
     const initialData = getInitialProfileData();
@@ -33,10 +35,17 @@ export default function ProfilePage() {
     e.preventDefault();
     try {
       localStorage.setItem('profileData', JSON.stringify(profileData));
-      alert('Profile updated successfully!');
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully!",
+      });
     } catch (error) {
       console.error('Error saving profile data to local storage:', error);
-      alert('Failed to update profile.');
+      toast({
+        variant: "destructive",
+        title: "Profile Update Failed",
+        description: "Failed to update profile.",
+      });
     }
   };
 
