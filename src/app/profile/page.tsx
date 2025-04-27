@@ -13,13 +13,7 @@ interface ProfileData {
 }
 
 const getInitialProfileData = (): ProfileData => {
-  try {
-    const storedProfile = localStorage.getItem('profileData');
-    return storedProfile ? JSON.parse(storedProfile) : {name: '', skills: '', interests: ''};
-  } catch (error) {
-    console.error('Error retrieving profile data from local storage:', error);
-    return {name: '', skills: '', interests: ''};
-  }
+  return {name: '', skills: '', interests: ''};
 };
 
 export default function ProfilePage() {
@@ -27,14 +21,37 @@ export default function ProfilePage() {
   const {toast} = useToast();
 
   useEffect(() => {
-    const initialData = getInitialProfileData();
-    setProfileData(initialData);
+    const storedProfile = localStorage.getItem('myProfile');
+    if (storedProfile) {
+      setProfileData(JSON.parse(storedProfile));
+    }
   }, []);
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      localStorage.setItem('profileData', JSON.stringify(profileData));
+      // Get existing profiles from local storage
+      let profiles: ProfileData[] = [];
+      const storedProfiles = localStorage.getItem('profiles');
+      if (storedProfiles) {
+        profiles = JSON.parse(storedProfiles);
+      }
+
+      // Check if the current profile already exists in the list
+      const existingProfileIndex = profiles.findIndex(p => p.name === profileData.name);
+
+      if (existingProfileIndex !== -1) {
+        // Update the existing profile
+        profiles[existingProfileIndex] = profileData;
+      } else {
+        // Add the current profile to the list
+        profiles.push(profileData);
+      }
+
+      // Save the updated list back to local storage
+      localStorage.setItem('profiles', JSON.stringify(profiles));
+      localStorage.setItem('myProfile', JSON.stringify(profileData));
+
       toast({
         title: "Profile Updated",
         description: "Your profile has been updated successfully!",
