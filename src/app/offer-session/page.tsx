@@ -29,13 +29,15 @@ export default function OfferSessionPage() {
   useEffect(() => {
     const allRequests = getSessionRequests();
 
-    // Filter session requests to only show those where the requester name matches the current profile name
+    // Get the current profile name
     const myProfile = localStorage.getItem('myProfile');
     let myName = "Your Name";
     if (myProfile) {
       const profileData = JSON.parse(myProfile);
       myName = profileData.name || "Your Name";
     }
+
+    // Filter session requests to only show those where the requester name matches the current profile name
     const myRequests = allRequests.filter(request => request.requesterName === myName);
     setMySessionRequests(myRequests);
 
