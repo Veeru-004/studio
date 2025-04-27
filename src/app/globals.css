@@ -81,3 +81,54 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Form styles */
+input[type='text'],
+input[type='email'],
+textarea {
+  @apply w-full px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-primary;
+}
+
+label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+/* Session Offering Styles */
+.session-card {
+  @apply bg-white rounded-lg shadow-md overflow-hidden;
+}
+
+.session-card-header {
+  @apply px-6 py-4 bg-gray-100;
+}
+
+.session-card-title {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.session-card-content {
+  @apply px-6 py-4;
+}
+
+.session-card-description {
+  @apply text-gray-700;
+}
+
+.session-card-footer {
+  @apply px-6 py-4 bg-gray-100 border-t;
+}
+
+/* Utility Classes */
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+/*.text-primary {
+  @apply text-primary-foreground;
+}
+
+.text-secondary {
+  @apply text-secondary;
+}*/
+
+

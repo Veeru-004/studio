@@ -1,15 +1,21 @@
-'use server';
+'use client';
 
+import {useState} from 'react';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Button} from '@/components/ui/button';
 
 export default function ProfilePage() {
-  async function handleProfileSubmit(formData: FormData) {
-    'use server';
-    console.log('Form data:', formData);
-    // TODO Implement profile update logic here
-  }
+  const [name, setName] = useState('');
+  const [skills, setSkills] = useState('');
+  const [interests, setInterests] = useState('');
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form data:', {name, skills, interests});
+    // TODO Implement profile update logic here (e.g., store in local storage or a database)
+    alert('Profile updated successfully!');
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -22,18 +28,39 @@ export default function ProfilePage() {
         </p>
 
         <div className="mt-12 w-full max-w-md">
-          <form action={handleProfileSubmit} className="flex flex-col space-y-4">
+          <form onSubmit={handleProfileSubmit} className="flex flex-col space-y-4">
             <div>
               <Label htmlFor="name">Name</Label>
-              <Input type="text" id="name" name="name" placeholder="Your Name"/>
+              <Input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Your Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
             <div>
               <Label htmlFor="skills">Skills You Can Teach</Label>
-              <Input type="text" id="skills" name="skills" placeholder="e.g., Math, Programming, Art"/>
+              <Input
+                type="text"
+                id="skills"
+                name="skills"
+                placeholder="e.g., Math, Programming, Art"
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+              />
             </div>
             <div>
               <Label htmlFor="interests">Skills You Want to Learn</Label>
-              <Input type="text" id="interests" name="interests" placeholder="e.g., Cooking, Music, Writing"/>
+              <Input
+                type="text"
+                id="interests"
+                name="interests"
+                placeholder="e.g., Cooking, Music, Writing"
+                value={interests}
+                onChange={(e) => setInterests(e.target.value)}
+              />
             </div>
             <Button type="submit">Update Profile</Button>
           </form>
