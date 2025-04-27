@@ -3,12 +3,22 @@
 import {useEffect, useState} from 'react';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {useRouter} from "next/navigation";
 
 interface SessionRequest {
   id: string;
   skill: string;
-  requesterName: string;
-  requesterSkills: string;
+  teacherName: string;
+  teacherSkills: string;
+  studentName: string;
+  studentSkills: string;
+}
+
+interface ProfileData {
+  id: string;
+  name: string;
+  skills: string;
+  interests: string;
 }
 
 const getSessionRequests = (): SessionRequest[] => {
@@ -22,29 +32,33 @@ const getSessionRequests = (): SessionRequest[] => {
 };
 
 export default function OfferSessionPage() {
-  const [mySessionRequests, setMySessionRequests] = useState<SessionRequest[]>([]);
   const [receivedSessionRequests, setReceivedSessionRequests] = useState<SessionRequest[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("myRequests");
+  const [activeTab, setActiveTab] = useState<string>("receivedRequests");
+  const [loggedInUser, setLoggedInUser] = useState<ProfileData | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (storedUser) {
+      setLoggedInUser(JSON.parse(storedUser));
+    } else {
+      router.push('/browse');
+    }
+  }, [router]);
 
   useEffect(() => {
     const allRequests = getSessionRequests();
 
-    // Get the current profile name
-    const myProfile = localStorage.getItem('myProfile');
-    let myName = "Your Name";
-    if (myProfile) {
-      const profileData = JSON.parse(myProfile);
-      myName = profileData.name || "Your Name";
+    if (loggedInUser) {
+      // Filter session requests to only show those received by the logged-in user.
+      const receivedRequests = allRequests.filter(request => request.teacherName === loggedInUser.name);
+      setReceivedSessionRequests(receivedRequests);
     }
+  }, [loggedInUser]);
 
-    // Filter session requests to only show those where the requester name matches the current profile name
-    const myRequests = allRequests.filter(request => request.requesterName === myName);
-    setMySessionRequests(myRequests);
-
-    // Filter session requests to only show those which are not made by the current profile name
-    const receivedRequests = allRequests.filter(request => request.requesterName !== myName);
-    setReceivedSessionRequests(receivedRequests);
-  }, []);
+  if (!loggedInUser) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -58,28 +72,8 @@ export default function OfferSessionPage() {
 
         <Tabs className="mt-12 w-full" value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="myRequests">My Requests</TabsTrigger>
             <TabsTrigger value="receivedRequests">Received Requests</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="myRequests">
-            <p className="mt-3 text-2xl text-muted-foreground">
-              Here are the sessions you have requested from others.
-            </p>
-            <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {mySessionRequests.map((request) => (
-                <Card key={request.id}>
-                  <CardHeader>
-                    <CardTitle>Request for: {request.skill}</CardTitle>
-                    <CardDescription>Requester: {request.requesterName}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    Requester Skills: {request.requesterSkills}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
 
           <TabsContent value="receivedRequests">
             <p className="mt-3 text-2xl text-muted-foreground">
@@ -90,10 +84,10 @@ export default function OfferSessionPage() {
                 <Card key={request.id}>
                   <CardHeader>
                     <CardTitle>Request for: {request.skill}</CardTitle>
-                    <CardDescription>Requester: {request.requesterName}</CardDescription>
+                    <CardDescription>Requester: {request.studentName}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    Requester Skills: {request.requesterSkills}
+                    Requester Skills: {request.studentSkills}
                   </CardContent>
                 </Card>
               ))}

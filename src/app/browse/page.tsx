@@ -3,8 +3,12 @@
 import {useEffect, useState} from 'react';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {useToast} from "@/hooks/use-toast";
 
 interface ProfileData {
+  id: string;
   name: string;
   skills: string;
   interests: string;
@@ -23,25 +27,82 @@ const getProfiles = (): ProfileData[] => {
 interface SessionRequest {
   id: string;
   skill: string;
-  requesterName: string;
-  requesterSkills: string;
+  teacherName: string;
+  teacherSkills: string;
+  studentName: string;
+  studentSkills: string;
 }
 
 export default function BrowsePage() {
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
+  const [loggedInUser, setLoggedInUser] = useState<ProfileData | null>(null);
+  const [newUserName, setNewUserName] = useState('');
+  const {toast} = useToast();
 
   useEffect(() => {
     const storedProfiles = getProfiles();
     setProfiles(storedProfiles);
+
+    // Get logged-in user
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (storedUser) {
+      setLoggedInUser(JSON.parse(storedUser));
+    }
   }, []);
 
-  const handleRequestSession = (profile: ProfileData) => {
+  const handleLogin = () => {
+    if (newUserName.trim() === '') {
+      alert('Please enter a user name.');
+      return;
+    }
+
+    // Check if the user already exists
+    let profiles = getProfiles();
+    let userProfile = profiles.find(profile => profile.name === newUserName);
+
+    if (!userProfile) {
+      // Create a new profile for the user if it doesn't exist
+      const newProfileId = Math.random().toString(36).substring(2, 15);
+      userProfile = {
+        id: newProfileId,
+        name: newUserName,
+        skills: '',
+        interests: '',
+      };
+      profiles.push(userProfile);
+      localStorage.setItem('profiles', JSON.stringify(profiles));
+    }
+
+    // Log in the user by storing their information
+    localStorage.setItem('loggedInUser', JSON.stringify(userProfile));
+    setLoggedInUser(userProfile);
+    setNewUserName('');
+
+    toast({
+      title: "Logged in",
+      description: `Logged in as ${userProfile.name}`
+    })
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('loggedInUser');
+    setLoggedInUser(null);
+  };
+
+  const handleRequestSession = (teacher: ProfileData) => {
+    if (!loggedInUser) {
+      alert('Please log in to request a session.');
+      return;
+    }
+
     const requestId = Math.random().toString(36).substring(2, 15);
     const sessionRequest: SessionRequest = {
       id: requestId,
-      skill: profile.skills,
-      requesterName: 'Your Name', // Replace with actual user name
-      requesterSkills: 'Your Skills', // Replace with actual user skills
+      skill: teacher.skills,
+      teacherName: teacher.name,
+      teacherSkills: teacher.skills,
+      studentName: loggedInUser.name,
+      studentSkills: loggedInUser.skills || 'No skills provided',
     };
 
     try {
@@ -58,13 +119,19 @@ export default function BrowsePage() {
       // Save the updated list back to local storage
       localStorage.setItem('sessionRequests', JSON.stringify(sessionRequests));
 
-      alert('Session requested successfully!');
+      toast({
+        title: "Session Requested",
+        description: `Session requested from ${teacher.name}`,
+      });
     } catch (error) {
       console.error('Error saving session request to local storage:', error);
-      alert('Failed to request session.');
+      toast({
+        variant: "destructive",
+        title: "Request Failed",
+        description: "Failed to request session.",
+      });
     }
   };
-
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -76,8 +143,29 @@ export default function BrowsePage() {
           Find and request sessions from other users.
         </p>
 
+        {loggedInUser ? (
+          <div>
+            <p className="mt-3 text-xl text-muted-foreground">
+              Logged in as: {loggedInUser.name}
+            </p>
+            <Button className="mt-2" onClick={handleLogout}>Logout</Button>
+          </div>
+        ) : (
+          <div className="mt-6 flex items-center space-x-4">
+            <Label htmlFor="newUserName">User Name:</Label>
+            <Input
+              type="text"
+              id="newUserName"
+              placeholder="Enter your user name"
+              value={newUserName}
+              onChange={(e) => setNewUserName(e.target.value)}
+            />
+            <Button onClick={handleLogin}>Login</Button>
+          </div>
+        )}
+
         <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {profiles.map((profile, index) => (
+          {profiles.filter(profile => loggedInUser && profile.id !== loggedInUser.id).map((profile, index) => (
             <Card key={index}>
               <CardHeader>
                 <CardTitle>{profile.name}</CardTitle>
@@ -86,7 +174,13 @@ export default function BrowsePage() {
               <CardContent>
                 Wants to learn: {profile.interests}
               </CardContent>
-              <Button className="m-4" onClick={() => handleRequestSession(profile)}>Request Session</Button>
+              <Button
+                className="m-4"
+                onClick={() => handleRequestSession(profile)}
+                disabled={!loggedInUser}
+              >
+                Request Session
+              </Button>
             </Card>
           ))}
         </div>

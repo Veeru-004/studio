@@ -7,29 +7,42 @@ import {Button} from '@/components/ui/button';
 import {useToast} from "@/hooks/use-toast";
 
 interface ProfileData {
+  id: string;
   name: string;
   skills: string;
   interests: string;
 }
 
-const getInitialProfileData = (): ProfileData => {
-  return {name: '', skills: '', interests: ''};
+const getInitialProfileData = (loggedInUser: ProfileData | null): ProfileData => {
+  return loggedInUser || { id: '', name: '', skills: '', interests: '' };
 };
 
 export default function ProfilePage() {
-  const [profileData, setProfileData] = useState<ProfileData>(getInitialProfileData);
+  const [profileData, setProfileData] = useState<ProfileData>(getInitialProfileData(null));
   const {toast} = useToast();
+  const [loggedInUser, setLoggedInUser] = useState<ProfileData | null>(null);
 
   useEffect(() => {
-    const storedProfile = localStorage.getItem('myProfile');
-    if (storedProfile) {
-      setProfileData(JSON.parse(storedProfile));
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (storedUser) {
+      const user = JSON.parse(storedUser) as ProfileData;
+      setLoggedInUser(user);
+      setProfileData(getInitialProfileData(user));
     }
   }, []);
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!loggedInUser) {
+        toast({
+          variant: "destructive",
+          title: "Not Logged In",
+          description: "Please log in to update your profile.",
+        });
+        return;
+      }
+
       // Get existing profiles from local storage
       let profiles: ProfileData[] = [];
       const storedProfiles = localStorage.getItem('profiles');
@@ -37,20 +50,23 @@ export default function ProfilePage() {
         profiles = JSON.parse(storedProfiles);
       }
 
-      // Check if the current profile already exists in the list
-      const existingProfileIndex = profiles.findIndex(p => p.name === profileData.name);
+      // Update the current profile data with the logged-in user's ID
+      const updatedProfileData = { ...profileData, id: loggedInUser.id };
+
+      // Find the index of the logged-in user's profile
+      const existingProfileIndex = profiles.findIndex(p => p.id === loggedInUser.id);
 
       if (existingProfileIndex !== -1) {
         // Update the existing profile
-        profiles[existingProfileIndex] = profileData;
+        profiles[existingProfileIndex] = updatedProfileData;
       } else {
         // Add the current profile to the list
-        profiles.push(profileData);
+        profiles.push(updatedProfileData);
       }
 
       // Save the updated list back to local storage
       localStorage.setItem('profiles', JSON.stringify(profiles));
-      localStorage.setItem('myProfile', JSON.stringify(profileData));
+      localStorage.setItem('loggedInUser', JSON.stringify(updatedProfileData));
 
       toast({
         title: "Profile Updated",
@@ -95,6 +111,7 @@ export default function ProfilePage() {
                 placeholder="Your Name"
                 value={profileData.name}
                 onChange={handleInputChange}
+                disabled={true}
               />
             </div>
             <div>

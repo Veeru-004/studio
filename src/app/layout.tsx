@@ -40,6 +40,9 @@ export default function RootLayout({
             <Link href="/browse" className="hover:text-secondary">
               Browse
             </Link>
+            <Link href="/requested-sessions" className="hover:text-secondary">
+              My Requests
+            </Link>
           </div>
         </nav>
         {children}
@@ -47,5 +50,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-
