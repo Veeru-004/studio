@@ -1,20 +1,51 @@
 'use client';
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Button} from '@/components/ui/button';
 
+interface ProfileData {
+  name: string;
+  skills: string;
+  interests: string;
+}
+
+const getInitialProfileData = (): ProfileData => {
+  try {
+    const storedProfile = localStorage.getItem('profileData');
+    return storedProfile ? JSON.parse(storedProfile) : {name: '', skills: '', interests: ''};
+  } catch (error) {
+    console.error('Error retrieving profile data from local storage:', error);
+    return {name: '', skills: '', interests: ''};
+  }
+};
+
 export default function ProfilePage() {
-  const [name, setName] = useState('');
-  const [skills, setSkills] = useState('');
-  const [interests, setInterests] = useState('');
+  const [profileData, setProfileData] = useState<ProfileData>(getInitialProfileData);
+
+  useEffect(() => {
+    const initialData = getInitialProfileData();
+    setProfileData(initialData);
+  }, []);
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form data:', {name, skills, interests});
-    // TODO Implement profile update logic here (e.g., store in local storage or a database)
-    alert('Profile updated successfully!');
+    try {
+      localStorage.setItem('profileData', JSON.stringify(profileData));
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error saving profile data to local storage:', error);
+      alert('Failed to update profile.');
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const {name, value} = e.target;
+    setProfileData(prevData => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   return (
@@ -36,8 +67,8 @@ export default function ProfilePage() {
                 id="name"
                 name="name"
                 placeholder="Your Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={profileData.name}
+                onChange={handleInputChange}
               />
             </div>
             <div>
@@ -47,8 +78,8 @@ export default function ProfilePage() {
                 id="skills"
                 name="skills"
                 placeholder="e.g., Math, Programming, Art"
-                value={skills}
-                onChange={(e) => setSkills(e.target.value)}
+                value={profileData.skills}
+                onChange={handleInputChange}
               />
             </div>
             <div>
@@ -58,8 +89,8 @@ export default function ProfilePage() {
                 id="interests"
                 name="interests"
                 placeholder="e.g., Cooking, Music, Writing"
-                value={interests}
-                onChange={(e) => setInterests(e.target.value)}
+                value={profileData.interests}
+                onChange={handleInputChange}
               />
             </div>
             <Button type="submit">Update Profile</Button>
