@@ -6,6 +6,7 @@ import {Button} from '@/components/ui/button';
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {useToast} from "@/hooks/use-toast";
+import {useRouter} from "next/navigation";
 
 interface ProfileData {
   id: string;
@@ -38,6 +39,7 @@ export default function BrowsePage() {
   const [loggedInUser, setLoggedInUser] = useState<ProfileData | null>(null);
   const [newUserName, setNewUserName] = useState('');
   const {toast} = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const storedProfiles = getProfiles();
@@ -50,9 +52,19 @@ export default function BrowsePage() {
     }
   }, []);
 
+  useEffect(() => {
+    // Update profiles when loggedInUser changes, ensuring up-to-date filtering
+    const storedProfiles = getProfiles();
+    setProfiles(storedProfiles);
+  }, [loggedInUser]);
+
   const handleLogin = () => {
     if (newUserName.trim() === '') {
-      alert('Please enter a user name.');
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: 'Please enter a user name.',
+      });
       return;
     }
 
@@ -82,16 +94,38 @@ export default function BrowsePage() {
       title: "Logged in",
       description: `Logged in as ${userProfile.name}`
     })
+
+    // Update profiles state to reflect login
+    setProfiles(getProfiles());
   };
 
   const handleLogout = () => {
     localStorage.removeItem('loggedInUser');
     setLoggedInUser(null);
+    setProfiles(getProfiles()); // Refresh the profiles after logout
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+    router.push('/');
   };
 
   const handleRequestSession = (teacher: ProfileData) => {
     if (!loggedInUser) {
-      alert('Please log in to request a session.');
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: 'Please log in to request a session.',
+      });
+      return;
+    }
+
+    if (teacher.id === loggedInUser.id) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Request",
+        description: 'You cannot request a session from yourself.',
+      });
       return;
     }
 
@@ -133,6 +167,9 @@ export default function BrowsePage() {
     }
   };
 
+  // Filter profiles to exclude the logged-in user
+  const filteredProfiles = profiles.filter(profile => loggedInUser && profile.id !== loggedInUser.id);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <main className="flex flex-col items-center justify-center w-full flex-1 px-4 text-center">
@@ -165,7 +202,7 @@ export default function BrowsePage() {
         )}
 
         <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {profiles.filter(profile => loggedInUser && profile.id !== loggedInUser.id).map((profile, index) => (
+          {filteredProfiles.map((profile, index) => (
             <Card key={index}>
               <CardHeader>
                 <CardTitle>{profile.name}</CardTitle>

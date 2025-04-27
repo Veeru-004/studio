@@ -51,7 +51,7 @@ export default function ProfilePage() {
       }
 
       // Update the current profile data with the logged-in user's ID
-      const updatedProfileData = { ...profileData, id: loggedInUser.id };
+      const updatedProfileData = { ...profileData, id: loggedInUser.id, name: loggedInUser.name };
 
       // Find the index of the logged-in user's profile
       const existingProfileIndex = profiles.findIndex(p => p.id === loggedInUser.id);
@@ -67,6 +67,9 @@ export default function ProfilePage() {
       // Save the updated list back to local storage
       localStorage.setItem('profiles', JSON.stringify(profiles));
       localStorage.setItem('loggedInUser', JSON.stringify(updatedProfileData));
+
+      // Update local state to reflect the changes
+      setProfileData(updatedProfileData);
 
       toast({
         title: "Profile Updated",
@@ -90,6 +93,11 @@ export default function ProfilePage() {
     }));
   };
 
+  if (!loggedInUser) {
+    return <div className="flex flex-col items-center justify-center min-h-screen">Please log in to view your profile.</div>;
+  }
+
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <main className="flex flex-col items-center justify-center w-full flex-1 px-4 text-center">
@@ -109,8 +117,7 @@ export default function ProfilePage() {
                 id="name"
                 name="name"
                 placeholder="Your Name"
-                value={profileData.name}
-                onChange={handleInputChange}
+                value={loggedInUser.name}
                 disabled={true}
               />
             </div>

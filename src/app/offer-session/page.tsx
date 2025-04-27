@@ -4,6 +4,7 @@ import {useEffect, useState} from 'react';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useRouter} from "next/navigation";
+import {useToast} from "@/hooks/use-toast";
 
 interface SessionRequest {
   id: string;
@@ -36,6 +37,7 @@ export default function OfferSessionPage() {
   const [activeTab, setActiveTab] = useState<string>("receivedRequests");
   const [loggedInUser, setLoggedInUser] = useState<ProfileData | null>(null);
   const router = useRouter();
+  const {toast} = useToast();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
@@ -47,14 +49,35 @@ export default function OfferSessionPage() {
   }, [router]);
 
   useEffect(() => {
-    const allRequests = getSessionRequests();
-
     if (loggedInUser) {
-      // Filter session requests to only show those received by the logged-in user.
+      // Retrieve all session requests
+      const allRequests = getSessionRequests();
+
+      // Filter session requests to show only those where the logged-in user is the teacher
       const receivedRequests = allRequests.filter(request => request.teacherName === loggedInUser.name);
       setReceivedSessionRequests(receivedRequests);
     }
   }, [loggedInUser]);
+
+  const handleAcceptRequest = (request: SessionRequest) => {
+    // Implement logic to "accept" the request.
+    // This might involve updating the state of the request in local storage,
+    // or sending a notification to the user who made the request.
+    toast({
+      title: "Session Accepted",
+      description: `You have accepted the session request from ${request.studentName} for ${request.skill}.`,
+    });
+  };
+
+  const handleRejectRequest = (request: SessionRequest) => {
+    // Implement logic to "reject" the request.
+    // This might involve updating the state of the request in local storage,
+    // or sending a notification to the user who made the request.
+    toast({
+      title: "Session Rejected",
+      description: `You have rejected the session request from ${request.studentName} for ${request.skill}.`,
+    });
+  };
 
   if (!loggedInUser) {
     return null;
@@ -80,17 +103,25 @@ export default function OfferSessionPage() {
               Here are the session requests you have received from others.
             </p>
             <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {receivedSessionRequests.map((request) => (
-                <Card key={request.id}>
-                  <CardHeader>
-                    <CardTitle>Request for: {request.skill}</CardTitle>
-                    <CardDescription>Requester: {request.studentName}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    Requester Skills: {request.studentSkills}
-                  </CardContent>
-                </Card>
-              ))}
+              {receivedSessionRequests.length > 0 ? (
+                receivedSessionRequests.map((request) => (
+                  <Card key={request.id}>
+                    <CardHeader>
+                      <CardTitle>Request for: {request.skill}</CardTitle>
+                      <CardDescription>Requester: {request.studentName}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      Requester Skills: {request.studentSkills}
+                    </CardContent>
+                    <div className="flex justify-around m-4">
+                      <Button onClick={() => handleAcceptRequest(request)}>Accept</Button>
+                      <Button variant="destructive" onClick={() => handleRejectRequest(request)}>Reject</Button>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <p>No session requests received.</p>
+              )}
             </div>
           </TabsContent>
         </Tabs>

@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
-import Link from 'next/link';
+import ClientLayout from "@/app/ClientLayout";
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -19,34 +19,15 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
-}: Readonly<{
+                                     children,
+                                   }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <nav className="flex items-center justify-between p-6">
-          <Link href="/" className="text-2xl font-bold text-primary">
-            SkillSwap
-          </Link>
-          <div className="flex space-x-4">
-            <Link href="/profile" className="hover:text-secondary">
-              Profile
-            </Link>
-            <Link href="/offer-session" className="hover:text-secondary">
-              Offer Session
-            </Link>
-            <Link href="/browse" className="hover:text-secondary">
-              Browse
-            </Link>
-            <Link href="/requested-sessions" className="hover:text-secondary">
-              My Requests
-            </Link>
-          </div>
-        </nav>
-        {children}
-      </body>
+    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <ClientLayout>{children}</ClientLayout>
+    </body>
     </html>
   );
 }
